@@ -1,0 +1,67 @@
+unit Udados;
+
+interface
+
+uses
+  System.SysUtils, System.Classes, FireDAC.Stan.Intf, FireDAC.Stan.Option,
+  FireDAC.Stan.Error, FireDAC.UI.Intf, FireDAC.Phys.Intf, FireDAC.Stan.Def,
+  FireDAC.Stan.Pool, FireDAC.Stan.Async, FireDAC.Phys, FireDAC.Phys.FBDef,
+  FireDAC.VCLUI.Wait, FireDAC.Comp.UI, FireDAC.Phys.IBBase, FireDAC.Phys.FB,
+  Data.DB, FireDAC.Comp.Client, classes.conexao, System.IniFiles, Vcl.Forms,
+  FireDAC.Stan.Param, FireDAC.DatS, FireDAC.DApt.Intf, FireDAC.DApt,
+  FireDAC.Comp.DataSet;
+
+type
+  TDmdados = class(TDataModule)
+    FDConnection: TFDConnection;
+    FBDriverLink: TFDPhysFBDriverLink;
+    FDGUIxWaitCursor: TFDGUIxWaitCursor;
+    sqlgen: TFDQuery;
+    procedure DataModuleCreate(Sender: TObject);
+    procedure DataModuleDestroy(Sender: TObject);
+  private
+
+    { Private declarations }
+  public
+      Conexao : Tconexao; // criando o objeto para ter todos os metodos da classe conexao
+      function ProximoID(GENERATOR: String) : Integer;
+    { Public declarations }
+  end;
+
+var
+  Dmdados: TDmdados;
+
+implementation
+
+{%CLASSGROUP 'Vcl.Controls.TControl'}
+
+
+
+{$R *.dfm}
+
+procedure TDmdados.DataModuleCreate(Sender: TObject);
+begin
+   Conexao := TConexao.Create(FDConnection);
+   // associa o componente a classe
+end;
+
+
+function TDmdados.ProximoID(GENERATOR: String) : Integer;
+begin
+   sqlgen.Close;
+   sqlgen.sql.Clear;
+   sqlgen.SQL.Add(' SELECT GEN_ID('+ (GENERATOR)+ ',1) as PROXIMO_ID FROM RDB$DATABASE ' );
+   sqlgen.Open;
+   result:=   sqlgen.FieldByName('PROXIMO_ID').AsInteger;
+   sqlgen.Close;
+
+end;
+
+procedure TDmdados.DataModuleDestroy(Sender: TObject);
+begin
+   Conexao.Destroy;
+end;
+
+
+
+end.

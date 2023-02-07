@@ -1,0 +1,263 @@
+unit USimulacaoPreco;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, cxGraphics,
+  cxLookAndFeels, cxLookAndFeelPainters, Vcl.Menus, cxControls, cxContainer,
+  cxEdit, Vcl.Mask, Vcl.DBCtrls, Vcl.StdCtrls, cxTextEdit, cxMaskEdit,
+  cxButtonEdit, cxButtons, LMDControl, LMDCustomControl, LMDCustomPanel,
+  LMDCustomBevelPanel, LMDCustomParentPanel, LMDCustomPanelFill, LMDPanelFill,
+  FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param,
+  FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
+  FireDAC.Stan.Async, FireDAC.DApt, Data.DB, FireDAC.Comp.DataSet,
+  FireDAC.Comp.Client, Vcl.ComCtrls;
+
+type
+  TFrmSimulacaoPreco = class(TForm)
+    pnlsimulacao: TPanel;
+    GroupBox1: TGroupBox;
+    Panel19: TPanel;
+    PRECO_COMPRA: TDBEdit;
+    Panel2: TPanel;
+    PERC_ICMS: TDBEdit;
+    Panel6: TPanel;
+    PERC_FRETE: TDBEdit;
+    Panel16: TPanel;
+    PERC_OUTRAS_DESPESAS: TDBEdit;
+    Panel5: TPanel;
+    PERC_IPI: TDBEdit;
+    Panel21: TPanel;
+    PERC_PIS: TDBEdit;
+    Panel20: TPanel;
+    PERC_COFINS: TDBEdit;
+    GroupBox2: TGroupBox;
+    Panel11: TPanel;
+    MARKUP: TDBEdit;
+    Panel9: TPanel;
+    PRECO_SUGERIDO: TDBEdit;
+    qrysimulacao: TFDQuery;
+    dssimulacao: TDataSource;
+    qrysimulacaoCODIGO_PRODUTO: TIntegerField;
+    qrysimulacaoPRECO_COMPRA: TSingleField;
+    qrysimulacaoPERC_ICMS: TSingleField;
+    qrysimulacaoPERC_FRETE: TSingleField;
+    qrysimulacaoPERC_OUTRAS_DESPESAS: TSingleField;
+    qrysimulacaoPERC_IPI: TSingleField;
+    qrysimulacaoPERC_PIS: TSingleField;
+    qrysimulacaoPERC_COFINS: TSingleField;
+    qrysimulacaoPERC_SUB_TRIBUTARIA: TSingleField;
+    qrysimulacaoMARKUP: TSingleField;
+    qrysimulacaoPRECO_SUGERIDO: TSingleField;
+    qrysimulacaoCUSTO_FINAL: TSingleField;
+    pnlTopo: TLMDPanelFill;
+    Panel30: TPanel;
+    txtDescricao_Produto: TEdit;
+    btnCarregarRegistro: TcxButton;
+    txtCodigo_Produto: TcxButtonEdit;
+    Panel1: TPanel;
+    CUSTO_FINAL: TDBEdit;
+    pnlTitulo: TLMDPanelFill;
+    qryaux: TFDQuery;
+    pnlBotoes: TLMDPanelFill;
+    btnCancelar: TcxButton;
+    btnGravaPreco: TcxButton;
+    btnSair: TcxButton;
+    btnExcluir: TcxButton;
+    StatusBar1: TStatusBar;
+    gbSubstituicao: TGroupBox;
+    Panel38: TPanel;
+    REDUCAO_BASE: TDBEdit;
+    Panel15: TPanel;
+    MVA: TDBEdit;
+    Panel10: TPanel;
+    BASE_SUB_TRIBUTARIA: TDBEdit;
+    Panel3: TPanel;
+    pnlSubstituicao: TPanel;
+    SUB_TRIBUTARIA: TDBEdit;
+    PERC_SUB_TRIBUTARIA: TDBEdit;
+    qrysimulacaoMVA: TSingleField;
+    qrysimulacaoBASE_SUB_TRIBUTARIA: TSingleField;
+    qrysimulacaoREDUCAO_BASE: TSingleField;
+    qrysimulacaoSUB_TRIBUTARIA: TSingleField;
+    procedure btnGravaPrecoClick(Sender: TObject);
+    procedure btnSairClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure FormKeyPress(Sender: TObject; var Key: Char);
+    procedure btnCarregarRegistroClick(Sender: TObject);
+    procedure qrysimulacaoPRECO_COMPRAChange(Sender: TField);
+    procedure qrysimulacaoMARKUPChange(Sender: TField);
+    procedure FormShow(Sender: TObject);
+    procedure btnExcluirClick(Sender: TObject);
+    procedure qrysimulacaoMVAChange(Sender: TField);
+    procedure qrysimulacaoREDUCAO_BASEChange(Sender: TField);
+    procedure qrysimulacaoPERC_SUB_TRIBUTARIAChange(Sender: TField);
+    procedure qrysimulacaoAfterInsert(DataSet: TDataSet);
+    procedure txtCodigo_ProdutoClick(Sender: TObject);
+  private
+    { Private declarations }
+    procedure CalculaValorSugerido();
+  public
+    { Public declarations }
+  end;
+
+var
+  FrmSimulacaoPreco: TFrmSimulacaoPreco;
+
+
+
+implementation
+
+  uses Udados, UConsultaProduto;
+
+{$R *.dfm}
+
+procedure TFrmSimulacaoPreco.btnCarregarRegistroClick(Sender: TObject);
+begin
+   qryaux.Close;
+   qryaux.SQL.Clear;
+   qryaux.SQL.Add(' select * from simulacao_preco where codigo_produto = '+ txtCodigo_Produto.Text);
+   qryaux.Open();
+
+   if qryaux.RecordCount <= 0 then
+   begin
+      qrysimulacao.Open();
+      qrysimulacao.Append;
+   end
+   else
+   begin
+      qrysimulacao.Close;
+      qrysimulacao.SQL.Clear;
+      qrysimulacao.SQL.Add(' select * from simulacao_preco where codigo_produto = '+ txtCodigo_Produto.Text);
+      qrysimulacao.Open();
+      qrysimulacao.Edit;
+   end;
+
+   pnlsimulacao.Enabled := true;
+   PRECO_COMPRA.setfocus;
+end;
+
+procedure TFrmSimulacaoPreco.CalculaValorSugerido();
+var   cPrecoICMS, cPrecoIPI, cOutrasDespesas , cPrecoFrete, cPrecoPIS, cPrecoCOFINS : Currency;
+begin
+   cPrecoICMS               := (qrysimulacaoPRECO_COMPRA.AsCurrency * (qrysimulacaoPERC_ICMS.AsCurrency /100)) ;
+   cOutrasDespesas          := (qrysimulacaoPRECO_COMPRA.AsCurrency * (qrysimulacaoPERC_OUTRAS_DESPESAS.AsCurrency/100)) ;
+   cPrecoIPI                := (qrysimulacaoPRECO_COMPRA.AsCurrency * (qrysimulacaoPERC_IPI.AsCurrency /100)) ;
+   cPrecoFrete              := ((qrysimulacaoPRECO_COMPRA.AsCurrency + cPrecoIPI ) * (qrysimulacaoPERC_FRETE.AsCurrency /100));
+   cPrecoPIS                := ((qrysimulacaoPRECO_COMPRA.AsCurrency + cPrecoIPI  ) * (qrysimulacaoPERC_PIS.AsCurrency /100));
+   cPrecoCOFINS             := ((qrysimulacaoPRECO_COMPRA.AsCurrency + cPrecoIPI  ) * (qrysimulacaoPERC_COFINS.AsCurrency /100));
+
+
+   if (qrysimulacaoMVA.AsCurrency > 0) then
+   begin
+      qrysimulacaoBASE_SUB_TRIBUTARIA.AsCurrency := ((((qrysimulacaoPRECO_COMPRA.AsCurrency ) * (1 - (qrysimulacaoREDUCAO_BASE.AsFloat / 100)) ) + ((qrysimulacaoPRECO_COMPRA.AsCurrency) * (qrysimulacaoPERC_IPI.AsCurrency /100))) *
+                                                          (1 + (qrysimulacaoMVA.AsCurrency/100)));
+
+      qrysimulacaoSUB_TRIBUTARIA.AsCurrency      := ((qrysimulacaoBASE_SUB_TRIBUTARIA.AsCurrency * (qrysimulacaoPERC_SUB_TRIBUTARIA.AsCurrency /100)) - (((qrysimulacaoPRECO_COMPRA.AsCurrency ) * (1 - (qrysimulacaoREDUCAO_BASE.AsFloat / 100))) * (qrysimulacaoPERC_ICMS.AsCurrency /100)));
+
+   end
+   else
+   begin
+       qrysimulacaoBASE_SUB_TRIBUTARIA.AsCurrency := 0;
+       qrysimulacaoBASE_SUB_TRIBUTARIA.AsCurrency      := 0;
+   end;
+
+   qrysimulacaoCUSTO_FINAL.AsFloat := qrysimulacaoPRECO_COMPRA.AsFloat - cPrecoICMS + cPrecoIPI + cOutrasDespesas + cPrecoFrete + qrysimulacaoPERC_SUB_TRIBUTARIA.AsFloat - cPrecoPIS - cPrecoCOFINS ;
+end;
+
+procedure TFrmSimulacaoPreco.btnExcluirClick(Sender: TObject);
+begin
+   If Application.MessageBox('Confirma Exclusão da Simulação?','Atenção',MB_ICONQUESTION + MB_YESNO + MB_DEFBUTTON2) = idNo Then
+     Exit;
+
+   qrysimulacao.Delete;
+   Application.MessageBox('Dados excluidos com sucesso','Atenção',mb_iconexclamation);
+end;
+
+procedure TFrmSimulacaoPreco.btnGravaPrecoClick(Sender: TObject);
+begin
+   qrysimulacaoCODIGO_PRODUTO.Asinteger := strToint(txtCodigo_Produto.text);
+   qrysimulacao.Post;
+   ShowMessage('Os Dados foram gravados com sucesso!');
+   Formshow(nil);
+end;
+
+procedure TFrmSimulacaoPreco.btnSairClick(Sender: TObject);
+begin
+  close;
+end;
+
+procedure TFrmSimulacaoPreco.FormCreate(Sender: TObject);
+begin
+   Dmdados.FDConnection.Connected;
+   qrysimulacao.Open;
+end;
+
+procedure TFrmSimulacaoPreco.FormKeyPress(Sender: TObject; var Key: Char);
+begin
+   if key=#13 then
+      SelectNext(ActiveControl, true, true);
+end;
+
+procedure TFrmSimulacaoPreco.FormShow(Sender: TObject);
+begin
+  qrysimulacao.Close;
+  txtCodigo_Produto.Text    := '';
+  txtDescricao_Produto.Text := '';
+end;
+
+procedure TFrmSimulacaoPreco.qrysimulacaoAfterInsert(DataSet: TDataSet);
+begin
+   qrysimulacaoPRECO_COMPRA.AsCurrency         := 0;
+   qrysimulacaoPERC_ICMS.AsCurrency            := 0;
+   qrysimulacaoPERC_FRETE.AsCurrency           := 0;
+   qrysimulacaoPERC_OUTRAS_DESPESAS.AsCurrency := 0;
+   qrysimulacaoPERC_IPI.AsCurrency             := 0;
+   qrysimulacaoPERC_PIS.AsCurrency             := 0;
+   qrysimulacaoPERC_COFINS.AsCurrency          := 0;
+   qrysimulacaoPERC_SUB_TRIBUTARIA.AsCurrency  := 0;
+   qrysimulacaoMARKUP.AsCurrency               := 0;
+   qrysimulacaoPRECO_SUGERIDO.AsCurrency       := 0;
+   qrysimulacaoCUSTO_FINAL.AsCurrency          := 0;
+   qrysimulacaoMVA.AsCurrency                  := 0;
+   qrysimulacaoBASE_SUB_TRIBUTARIA.AsCurrency  := 0;
+   qrysimulacaoREDUCAO_BASE.AsCurrency         := 0;
+   qrysimulacaoSUB_TRIBUTARIA.AsCurrency       := 0;
+end;
+
+procedure TFrmSimulacaoPreco.qrysimulacaoMARKUPChange(Sender: TField);
+begin
+    qrysimulacaoPRECO_SUGERIDO.AsFloat :=  qrysimulacaoCUSTO_FINAL.AsFloat + ( qrysimulacaoCUSTO_FINAL.AsFloat * (qrysimulacaoMARKUP.AsFloat / 100));
+end;
+
+procedure TFrmSimulacaoPreco.qrysimulacaoMVAChange(Sender: TField);
+begin
+   CalculaValorSugerido();
+end;
+
+procedure TFrmSimulacaoPreco.qrysimulacaoPERC_SUB_TRIBUTARIAChange(
+  Sender: TField);
+begin
+   qrysimulacaoMVAChange(nil);
+   CalculaValorSugerido();
+end;
+
+procedure TFrmSimulacaoPreco.qrysimulacaoPRECO_COMPRAChange(Sender: TField);
+begin
+   CalculaValorSugerido();
+end;
+
+procedure TFrmSimulacaoPreco.qrysimulacaoREDUCAO_BASEChange(Sender: TField);
+begin
+   CalculaValorSugerido();
+end;
+
+procedure TFrmSimulacaoPreco.txtCodigo_ProdutoClick(Sender: TObject);
+begin
+   Application.CreateForm(TFrmConsultaProduto,FrmConsultaProduto );
+   FrmConsultaProduto.ShowModal;
+   FrmConsultaProduto.Free;
+end;
+
+end.

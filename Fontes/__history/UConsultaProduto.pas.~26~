@@ -1,0 +1,90 @@
+unit UConsultaProduto;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ComCtrls, LMDControl,
+  LMDCustomControl, LMDCustomPanel, LMDCustomBevelPanel, LMDCustomParentPanel,
+  LMDCustomPanelFill, LMDPanelFill, cxGraphics, cxLookAndFeels,
+  cxLookAndFeelPainters, Vcl.Menus, Data.DB, Vcl.Grids, Vcl.DBGrids,
+  Vcl.StdCtrls, cxButtons, Vcl.ExtCtrls, FireDAC.Stan.Intf, FireDAC.Stan.Option,
+  FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
+  FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet,
+  FireDAC.Comp.Client;
+
+type
+  TFrmConsultaProduto = class(TForm)
+    StatusBar1: TStatusBar;
+    pnlTitulo: TLMDPanelFill;
+    pnlTopo: TLMDPanelFill;
+    txtdescricao: TEdit;
+    Panel16: TPanel;
+    txtcodproduto: TEdit;
+    btnPesquisar: TcxButton;
+    btnSair: TcxButton;
+    DBGrid1: TDBGrid;
+    qryconsultaprod: TFDQuery;
+    dsconsulta: TDataSource;
+    qryconsultaprodCODIGO_PRODUTO: TIntegerField;
+    qryconsultaprodDESCRICAO_PROD: TStringField;
+    BtnOk: TcxButton;
+    procedure btnPesquisarClick(Sender: TObject);
+    procedure btnSairClick(Sender: TObject);
+    procedure BtnOkClick(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+    iTag : integer;
+  end;
+
+var
+  FrmConsultaProduto: TFrmConsultaProduto;
+
+implementation
+
+  uses Udados, UFuncoes, USimulacaoPreco, UCadProduto;
+
+{$R *.dfm}
+
+procedure TFrmConsultaProduto.BtnOkClick(Sender: TObject);
+begin
+if (FrmConsultaProduto.iTag = 1) then
+begin
+   FrmSimulacaoPreco.txtCodigo_Produto.Text := qryconsultaprodCODIGO_PRODUTO.AsString;
+   FrmSimulacaoPreco.btnCarregarRegistroClick(nil);
+   self.Close;
+
+end
+else if (FrmConsultaProduto.iTag = 2) then
+begin
+   FrmCadProduto.qryproduto.close;
+   FrmCadProduto.qryproduto.open;
+   FrmCadProduto.qryproduto.edit;
+   FrmCadProduto.qryprodutoCODIGO_PRODUTO.AsString := qryconsultaprodCODIGO_PRODUTO.AsString;
+   FrmCadProduto.CODIGO_PRODUTO.Text               := qryconsultaprodCODIGO_PRODUTO.AsString;
+   FrmCadProduto.CODIGO_PRODUTOExit(nil);
+
+   self.Close;
+
+end;
+
+
+end;
+
+procedure TFrmConsultaProduto.btnPesquisarClick(Sender: TObject);
+begin
+   qryconsultaprod.Close;
+   qryconsultaprod.SQL.text := ' SELECT *                               '+
+                               '       from produto             '+
+                             iif(txtcodproduto.Text <> '' , ' WHERE codigo_produto = '+ txtcodproduto.Text, '');
+   qryconsultaprod.Open();
+end;
+
+procedure TFrmConsultaProduto.btnSairClick(Sender: TObject);
+begin
+   close;
+end;
+
+end.

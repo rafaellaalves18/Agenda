@@ -1,0 +1,112 @@
+unit UConsultaSimulacao;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxLookAndFeels,
+  cxLookAndFeelPainters, Vcl.Menus, Vcl.ExtCtrls, Vcl.StdCtrls, cxButtons,
+  Vcl.ComCtrls, LMDControl, LMDCustomControl, LMDCustomPanel,
+  LMDCustomBevelPanel, LMDCustomParentPanel, LMDCustomPanelFill, LMDPanelFill,
+  Data.DB, Vcl.Grids, Vcl.DBGrids, FireDAC.Stan.Intf, FireDAC.Stan.Option,
+  FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
+  FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet,
+  FireDAC.Comp.Client, ppDB, ppDBPipe, ppDBBDE, ppComm, ppRelatv, ppProd,
+  ppClass, ppReport, ppBands, ppCache, ppDesignLayer, ppParameter, ppCtrls,
+  ppVar, ppPrnabl;
+
+type
+  TFrmConsultaSimulacao = class(TForm)
+    StatusBar1: TStatusBar;
+    pnlBotoes: TLMDPanelFill;
+    btnCancelar: TcxButton;
+    btnSair: TcxButton;
+    btnPesquisar: TcxButton;
+    Panel1: TPanel;
+    DBGrid1: TDBGrid;
+    btnImprimir: TcxButton;
+    qryconsulta: TFDQuery;
+    dsconsulta: TDataSource;
+    qryconsultaCODIGO_PRODUTO: TIntegerField;
+    qryconsultaPRECO_COMPRA: TSingleField;
+    qryconsultaPERC_ICMS: TSingleField;
+    qryconsultaPERC_FRETE: TSingleField;
+    qryconsultaPERC_OUTRAS_DESPESAS: TSingleField;
+    qryconsultaPERC_IPI: TSingleField;
+    qryconsultaPERC_PIS: TSingleField;
+    qryconsultaPERC_COFINS: TSingleField;
+    qryconsultaMARKUP: TSingleField;
+    qryconsultaPRECO_SUGERIDO: TSingleField;
+    qryconsultaCUSTO_FINAL: TSingleField;
+    qryconsultaSUB_TRIBUTARIA: TSingleField;
+    pnlTopo: TLMDPanelFill;
+    txtdescricao: TEdit;
+    Panel16: TPanel;
+    txtcodproduto: TEdit;
+    ppReport1: TppReport;
+    ppBDEPipeline1: TppBDEPipeline;
+    ppParameterList1: TppParameterList;
+    ppDesignLayers1: TppDesignLayers;
+    ppDesignLayer1: TppDesignLayer;
+    ppHeaderBand1: TppHeaderBand;
+    ppDetailBand1: TppDetailBand;
+    ppFooterBand1: TppFooterBand;
+    ppLabel1: TppLabel;
+    ppSystemVariable1: TppSystemVariable;
+    ppSystemVariable2: TppSystemVariable;
+    ppLabel2: TppLabel;
+    ppDBText1: TppDBText;
+    ppLabel3: TppLabel;
+    ppDBText2: TppDBText;
+    ppLabel4: TppLabel;
+    ppDBText3: TppDBText;
+    pnlTitulo: TLMDPanelFill;
+    ppLine1: TppLine;
+    ppLabel5: TppLabel;
+    ppDBText4: TppDBText;
+    procedure btnPesquisarClick(Sender: TObject);
+    procedure btnCancelarClick(Sender: TObject);
+    procedure btnImprimirClick(Sender: TObject);
+    procedure btnSairClick(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  FrmConsultaSimulacao: TFrmConsultaSimulacao;
+
+implementation
+
+  uses Udados, UFuncoes;
+
+{$R *.dfm}
+
+procedure TFrmConsultaSimulacao.btnCancelarClick(Sender: TObject);
+begin
+  qryconsulta.Close;
+  txtcodproduto.Text := '';
+  txtdescricao.Text  :=''
+end;
+
+procedure TFrmConsultaSimulacao.btnImprimirClick(Sender: TObject);
+begin
+   ppReport1.Print;
+end;
+
+procedure TFrmConsultaSimulacao.btnPesquisarClick(Sender: TObject);
+begin
+   qryconsulta.Close;
+   qryconsulta.SQL.add ( ' SELECT *                               ');
+   qryconsulta.SQL.add ( '       from simulacao_preco             ');
+   qryconsulta.SQL.add ( iif(txtcodproduto.Text <> '' , ' WHERE codigo_produto = '+ txtcodproduto.Text, ''));
+   qryconsulta.Open();
+end;
+
+procedure TFrmConsultaSimulacao.btnSairClick(Sender: TObject);
+begin
+   close;
+end;
+
+end.

@@ -1,0 +1,19 @@
+unit UFuncoes;
+
+interface
+uses
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Mask;
+
+  procedure prcValidaCamposObr (Form: TForm);
+
+implementation
+
+
+procedure prcValidaCamposObr (Form: TForm);
+var
+   i : integer;
+begin
+
+end;
+
+end.
